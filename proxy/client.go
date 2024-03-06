@@ -89,7 +89,7 @@ func (c *Client) Commit(ctx context.Context, blobs []da.Blob) ([]da.Commitment, 
 }
 
 // Submit submits the Blobs to Data Availability layer.
-func (c *Client) Submit(ctx context.Context, blobs []da.Blob, gasPrice float64) ([]da.ID, []da.Proof, error) {
+func (c *Client) Submit(ctx context.Context, blobs []da.Blob, gasPrice float64) ([]da.ID, error) {
 	req := &pbda.SubmitRequest{
 		Blobs:    blobsDA2PB(blobs),
 		GasPrice: gasPrice,
@@ -97,17 +97,15 @@ func (c *Client) Submit(ctx context.Context, blobs []da.Blob, gasPrice float64) 
 
 	resp, err := c.client.Submit(ctx, req)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	ids := make([]da.ID, len(resp.Ids))
-	proofs := make([]da.Proof, len(resp.Proofs))
 	for i := range resp.Ids {
 		ids[i] = resp.Ids[i].Value
-		proofs[i] = resp.Proofs[i].Value
 	}
 
-	return ids, proofs, nil
+	return ids, nil
 }
 
 // Validate validates Commitments against the corresponding Proofs. This should be possible without retrieving the Blobs.
